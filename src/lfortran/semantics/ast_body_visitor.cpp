@@ -5532,8 +5532,10 @@ public:
         v->n_dependencies = func_deps.size();
         v->m_deterministic = current_function_deterministic;
         v->m_side_effect_free = current_function_side_effect_free;
-        check_pure_function(v, v->m_body, v->n_body, diag,
-            compiler_options.continue_compilation);
+        if (!is_template) {
+            check_pure_function(v, v->m_body, v->n_body, diag,
+                compiler_options.continue_compilation);
+        }
         current_function_deterministic = old_deterministic;
         current_function_side_effect_free = old_side_effect_free;
         for (size_t i=0; i<x.n_contains; i++) {
@@ -5631,8 +5633,10 @@ public:
         v->n_dependencies = func_deps.size();
         v->m_deterministic = current_function_deterministic;
         v->m_side_effect_free = current_function_side_effect_free;
-        check_pure_function(v, v->m_body, v->n_body, diag,
-            compiler_options.continue_compilation);
+        if (!is_template) {
+            check_pure_function(v, v->m_body, v->n_body, diag,
+                compiler_options.continue_compilation);
+        }
         current_function_deterministic = old_deterministic;
         current_function_side_effect_free = old_side_effect_free;
 
@@ -5724,8 +5728,10 @@ public:
         v->n_dependencies = func_deps.size();
         v->m_deterministic = current_function_deterministic;
         v->m_side_effect_free = current_function_side_effect_free;
-        check_pure_function(v, v->m_body, v->n_body, diag,
-            compiler_options.continue_compilation);
+        if (!is_template) {
+            check_pure_function(v, v->m_body, v->n_body, diag,
+                compiler_options.continue_compilation);
+        }
         current_function_deterministic = old_deterministic;
         current_function_side_effect_free = old_side_effect_free;
 
