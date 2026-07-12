@@ -937,43 +937,10 @@ class ArrayConstantVisitor : public ASR::CallReplacerOnExpressionsVisitor<ArrayC
             // Do nothing, already handled in init_expr pass
         }
 
-        void visit_Function(const ASR::Function_t& x) {
-            // Skip visiting m_function_signature here. Array constants that
-            // appear inside a function's signature (e.g. inside a
-            // dynamic-length String's m_len expression, such as
-            // `character(len_trim(param_array(n)))`) are type-level
-            // metadata, not executable statements. Applying the
-            // ArrayConstant -> temp-variable transform to them creates a
-            // variable in whichever current_scope happens to be active at
-            // visit time, with no corresponding Allocate statement placed
-            // in the right function body, which later causes an LLVM
-            // "instruction does not dominate all uses" error when the
-            // signature is inspected both from the function itself and
-            // from a caller's FunctionCall type.
-            ASR::Function_t& xx = const_cast<ASR::Function_t&>(x);
-            SymbolTable* current_scope_copy = current_scope;
-            current_scope = x.m_symtab;
-            for (auto &a : x.m_symtab->get_scope()) {
-                this->visit_symbol(*a.second);
-            }
-            for (size_t i = 0; i < x.n_args; i++) {
-                ASR::expr_t** current_expr_copy_0 = current_expr;
-                current_expr = const_cast<ASR::expr_t**>(&(x.m_args[i]));
-                this->call_replacer();
-                current_expr = current_expr_copy_0;
-                if (x.m_args[i] && visit_expr_after_replacement)
-                    this->visit_expr(*x.m_args[i]);
-            }
-            this->transform_stmts(xx.m_body, xx.n_body);
-            if (x.m_return_var) {
-                ASR::expr_t** current_expr_copy_1 = current_expr;
-                current_expr = const_cast<ASR::expr_t**>(&(x.m_return_var));
-                this->call_replacer();
-                current_expr = current_expr_copy_1;
-                if (x.m_return_var && visit_expr_after_replacement)
-                    this->visit_expr(*x.m_return_var);
-            }
-            current_scope = current_scope_copy;
+        void visit_ttype(const ASR::ttype_t& /*x*/) {
+            // Do nothing. Array constants that appear inside type metadata
+            // (e.g. dynamic-length strings) are not executable statements.
+            // Replacing them here creates dangling local variables.
         }
 
         void call_replacer() {
