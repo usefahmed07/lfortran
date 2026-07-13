@@ -175,26 +175,16 @@ private :
      *  to get it due to name mangling -- So just create a one.
      */
     ASR::symbol_t* get_resolved_symbol(ASR::symbol_t* sym){
-        // Use the immediate owner (Function or Module), not the nearest
-        // enclosing Module -- a symbol declared inside a nested function
-        // (e.g. a PARAMETER local to a CONTAINS'd function) must produce
-        // an ExternalSymbol whose m_module_name is that function's name,
-        // not the name of some outer module several scopes up.
-        ASR::symbol_t *sym_owner = ASRUtils::get_asr_owner(sym);
-        if (sym_owner != nullptr &&
-            !ASR::is_a<ASR::Module_t>(*sym_owner) &&
-            !ASR::is_a<ASR::Function_t>(*sym_owner)) {
-            sym_owner = nullptr;
-        }
+        ASR::Module_t *sym_mod = ASRUtils::get_sym_module(sym);
         if(ASR::symbol_t* func = current_scope_->resolve_symbol(ASRUtils::symbol_name(sym))){
             auto const sym_deep  =  ASRUtils::symbol_get_past_external(sym);
             auto const func_deep =  ASRUtils::symbol_get_past_external(func);
             if(sym_deep == func_deep) return func; // Found In Current Scope -- Do Nothing
-            if (!sym_owner) {
+            if (!sym_mod) {
                 return func;
             }
         }
-        if (!sym_owner) {
+        if (!sym_mod) {
             return sym;
         }
 
@@ -203,7 +193,7 @@ private :
         auto ext_sym = ASR::down_cast<ASR::symbol_t>(
                 ASR::make_ExternalSymbol_t(al_, sym->base.loc, 
                                     current_scope_, unique_name, sym,
-                                    s2c(al_, ASRUtils::symbol_name(sym_owner)), nullptr, 0,
+                                    sym_mod->m_name, nullptr, 0,
                                     ASRUtils::symbol_name(sym), ASR::Private));
         current_scope_->add_symbol(unique_name, ext_sym);
         return ext_sym;
