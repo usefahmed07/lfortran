@@ -1,0 +1,13 @@
+{
+    "basename": "asr-type_used_before_declared_01-aa81166",
+    "cmd": "lfortran --show-asr --no-color {infile} -o {outfile}",
+    "infile": "tests/errors/type_used_before_declared_01.f90",
+    "infile_hash": "562756fa17355da7c154b49f63be03a55d39e9fa1c1d9ad9b28b17b6",
+    "outfile": null,
+    "outfile_hash": null,
+    "stdout": null,
+    "stdout_hash": null,
+    "stderr": "asr-type_used_before_declared_01-aa81166.stderr",
+    "stderr_hash": "2fd382ef1b567e8daabfb543ae15291c4993af811c34965904cccb77",
+    "returncode": 2
+}
