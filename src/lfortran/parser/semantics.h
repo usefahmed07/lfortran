@@ -11,6 +11,7 @@
 */
 
 #include <cstring>
+#include <set>
 
 #include <lfortran/ast.h>
 #include <libasr/string_utils.h>
@@ -964,6 +965,26 @@ static inline char** REDUCE_ARGS(Allocator &al, const Vec<ast_t*> args)
         a[i] = name2char(args.p[i]);
     }
     return a;
+}
+
+static inline void check_duplicate_namelist_params(
+        LCompilers::LFortran::Parser &p, const Vec<ast_t*> &namelist, const std::string &owner_kind,
+        const std::string &owner_name)
+{
+    std::set<std::string> seen_args;
+    for (size_t i = 0; i < namelist.size(); i++) {
+        std::string arg = LCompilers::to_lower(name2char(namelist.p[i]));
+        if (seen_args.find(arg) != seen_args.end()) {
+            p.diag.add(LCompilers::diag::Diagnostic(
+                "Parameter '" + arg + "' is declared more than once in "
+                + owner_kind + " '" + owner_name + "'",
+                LCompilers::diag::Level::Error, LCompilers::diag::Stage::Semantic, {
+                    LCompilers::diag::Label("", {namelist.p[i]->loc})
+                }));
+            throw LCompilers::LFortran::parser_local::ParserAbort();
+        }
+        seen_args.insert(arg);
+    }
 }
 
 static inline reduce_opType convert_id_to_reduce_type(
@@ -2766,10 +2787,11 @@ ast_t* TYPEPARAMETER0(Allocator &al,
         REDUCE_ARGS(p.m_a, namelist), namelist.size(), \
         /*unit_decl2_t** a_decl*/ DECLS(decl), /*size_t n_decl*/ decl.size(), \
         /*contains*/ CONTAINS(contains), /*n_contains*/ contains.size())
-#define REQUIREMENT(name, namelist, decl, funcs, l) \
+#define REQUIREMENT(name, namelist, decl, funcs, l) ( \
+        check_duplicate_namelist_params(p, namelist, "requirement", LCompilers::to_lower(name2char(name))), \
         make_Requirement_t(p.m_a, l, name2char(name), \
         REDUCE_ARGS(p.m_a, namelist), namelist.size(), \
-        DECLS(decl), decl.size(), CONTAINS(funcs), funcs.size())
+        DECLS(decl), decl.size(), CONTAINS(funcs), funcs.size()))
 #define REQUIRE(require_list, l) \
         make_Require_t(p.m_a, l, \
         VEC_CAST(require_list, unit_require), require_list.size())
