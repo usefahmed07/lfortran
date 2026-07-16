@@ -643,7 +643,7 @@ bool check_newlines(const std::string &s, const std::vector<uint32_t> &newlines)
 void process_include(std::string& out, const std::string& s,
                      LocationManager& lm, size_t& pos, bool fixed_form,
                      std::vector<std::filesystem::path> &include_dirs,
-                     int &col)
+                     int &col, diag::Diagnostics &diagnostics)
 {
     std::string include_filename;
     parse_string(include_filename, s, pos, fixed_form, col);
@@ -665,9 +665,15 @@ void process_include(std::string& out, const std::string& s,
     }
 
     if (!file_found) {
-        throw LCompilersException("Include file '" + include_filename
+        Location loc;
+        loc.first = pos;
+        loc.last = pos;
+        diagnostics.add(diag::Diagnostic(
+            "Include file '" + include_filename
             + "' not found. If an include path "
-            "is available, please use the `-I` option to specify it.");
+            "is available, please use the `-I` option to specify it.",
+            diag::Level::Error, diag::Stage::Parser, {diag::Label("", {loc})}));
+        throw parser_local::ParserAbort();
     }
 
     LocationManager lm_tmp;
@@ -676,7 +682,13 @@ void process_include(std::string& out, const std::string& s,
         fl.in_filename = include_filename;
         lm_tmp.files.push_back(fl);
     }
-    include = prescan(include, lm_tmp, fixed_form, include_dirs);
+    Result<std::string> include_res = prescan(include, lm_tmp, fixed_form,
+        include_dirs, diagnostics);
+    if (include_res.ok) {
+        include = include_res.result;
+    } else {
+        throw parser_local::ParserAbort();
+    }
 
     // Possible it goes here
     // lm.files.back().out_start.push_back(out.size());
@@ -711,9 +723,11 @@ The prescan phase includes:
 - Conversion to lowercase (fixed-form only)
 - Handling of fixed-form column rules (columns 1–6 for labels/comments)
 */
-std::string prescan(const std::string &s, LocationManager &lm,
-        bool fixed_form, std::vector<std::filesystem::path> &include_dirs)
+Result<std::string> prescan(const std::string &s, LocationManager &lm,
+        bool fixed_form, std::vector<std::filesystem::path> &include_dirs,
+        diag::Diagnostics &diagnostics)
 {
+  try {
     if (fixed_form) {
         // `pos` is the position in the original code `s`
         // `out` is the final code (outcome)
@@ -804,7 +818,7 @@ std::string prescan(const std::string &s, LocationManager &lm,
                     while (pos < s.size() && s[pos] == ' ') pos++;
                     if ((s[pos] == '"') || (s[pos] == '\'')) {
                         process_include(out, s, lm, pos, fixed_form,
-                            include_dirs, col);
+                            include_dirs, col, diagnostics);
                     }
                     break;
                 }
@@ -840,7 +854,7 @@ std::string prescan(const std::string &s, LocationManager &lm,
                 pos += 7;
                 while (pos < s.size() && s[pos] == ' ') pos++;
                 LCOMPILERS_ASSERT(pos < s.size() && ((s[pos] == '"') || (s[pos] == '\'')));
-                process_include(out, s, lm, pos, fixed_form, include_dirs, col);
+                process_include(out, s, lm, pos, fixed_form, include_dirs, col, diagnostics);
             }
             newline = false;
             if (s[pos] == '!' && !in_string) in_comment = true;
@@ -886,6 +900,10 @@ std::string prescan(const std::string &s, LocationManager &lm,
         lm.files.back().out_start.push_back(out.size());
         return out;
     }
+  } catch (const parser_local::ParserAbort &) {
+    Error error;
+    return error;
+  }
 }
 
 
