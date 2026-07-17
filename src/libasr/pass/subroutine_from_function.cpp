@@ -760,6 +760,7 @@ class ReplaceFunctionCallWithSubroutineCallVisitor:
                     const Location& aloc = target->base.loc;
                     ASR::ttype_t* logical_type = ASRUtils::TYPE(ASR::make_Logical_t(al, aloc, 4));
                     ASRUtils::ExprStmtDuplicator target_duplicator(al);
+                    target_duplicator.allow_procedure_calls = true;
                     target_duplicator.success = true;
                     ASR::expr_t* target_copy = target_duplicator.duplicate_expr(target);
                     LCOMPILERS_ASSERT(target_duplicator.success);
