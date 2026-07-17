@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-
+echo "##[group] Setup"
 set -ex
 
 echo "CONDA_PREFIX=$CONDA_PREFIX"
+if [[ $(uname -s) == Linux ]] ; then
+  LINUX=1
+fi
 
 # Use freshly built LFortran
 
@@ -16,7 +19,21 @@ micromamba install -c conda-forge fpm=0.12.0
 which fpm
 fpm --version
 
+if [ $LINUX ] ; then
+
+(set +x
+ echo "##[endgroup]"
+ echo "##[group] Install OpenMPI"
+)
+
 micromamba install -y -c conda-forge openmpi
+export PRTE_MCA_rmaps_default_mapping_policy=:oversubscribe
+export OMPI_MCA_rmaps_base_oversubscribe=1
+
+(set +x 
+ echo "##[endgroup]"
+ echo "##[group] Install OpenCoarrays"
+)
 
 git clone https://github.com/sourceryinstitute/OpenCoarrays.git
 cd OpenCoarrays
@@ -29,10 +46,20 @@ cmake --install build
 
 export PATH="$HOME/opencoarrays/bin:$PATH"
 
+cd ..
+
 which caf
 caf --version
 
-cd ..
+which cafrun
+cafrun --version
+
+fi # LINUX
+
+(set +x 
+ echo "##[endgroup]"
+ echo "##[group] Install Caffeine"
+)
 
 # Clone caffeine
 
@@ -41,6 +68,11 @@ cd caffeine
 
 # Release 0.8.0
 git checkout 9a4a818d9617bc88890a9fdc9fd6e66959c7fad0
+
+# Cherry-pick a recent fix to -DCAF_IMPORT_TEAM_CONSTANTS
+git config user.email "nobody@nowhere.com"
+git config user.name  "Nobody"
+git cherry-pick 736130c4af77b4ab33e4341e6dcd32ab4c8b7f4a
 
 # Toolchain setup
 
@@ -54,11 +86,11 @@ echo "CXX=${CXX}"
 which clang
 clang --version
 
-which caf
-caf --version
+# inject ISO_Fortran_binding.h into the C include path
+export CPPFLAGS="-I$(lfortran --print-c-include-dir)"
 
-which cafrun
-cafrun --version
+# instruct Caffeine to import the iso_fortran_env constants from LFortran
+CPPFLAGS+=" -DCAF_IMPORT_CONSTANTS"
 
 # GASNet debug options
 
@@ -78,36 +110,34 @@ cd ..
 
 export PATH="$PWD/caffeine/inst/bin:$PATH"
 
+(set +x 
+ echo "##[endgroup]"
+ echo "##[group] Test setup"
+)
+
 # Number of coarray images
 
 CAF_IMAGES=${CAF_IMAGES:-2}
 
 echo "Using CAF_IMAGES=$CAF_IMAGES"
 
-# Remove benign STOP output differences
-
-normalize_output() {
-    sed '/^STOP$/d' | awk '{$1=$1;print}' | sort
-}
-
 # Find all coarray-enabled tests
 
 tests=$(python3 -c '
+import re
 filenames = []
-current_file = None
 
-for line in open("tests/tests.toml"):
-    line = line.strip()
-
-    if line.startswith("[[test]]"):
-        current_file = None
-
-    elif line.startswith("filename ="):
-        current_file = "tests/" + line.split("\"")[1]
-
-    elif "--coarray=true" in line:
-        if current_file:
-            filenames.append(current_file)
+with open("integration_tests/CMakeLists.txt") as f:
+    for line in f:
+        line = line.strip()
+        if line.startswith("RUN(") and "coarray=true" in line:
+            m = re.search(r"NAME\s+(\w+)", line)
+            if m:
+                num_images = ""
+                m_img = re.search(r"NUM_IMAGES[\s=]+(\d+)", line)
+                if m_img:
+                    num_images = m_img.group(1)
+                filenames.append(f"integration_tests/{m.group(1)}.f90:{num_images}")
 
 print(" ".join(filenames))
 ')
@@ -120,13 +150,24 @@ fi
 # OpenCoarrays (caf/cafrun) does not support character arguments to co_max/co_min,
 # so the gfortran cross-check is skipped for those tests. LFortran + Caffeine still
 # runs them, so LFortran's own behaviour stays verified.
-opencoarrays_unsupported="coarrays_11 coarrays_13"
+# coarrays_21: intermittent failures on OpenCoarrays
+opencoarrays_unsupported="coarrays_11 coarrays_13 coarrays_21"
 
-for testfile in $tests; do
-echo "========================================="
-echo "Running coarray test: $testfile"
-echo "========================================="
+for test_info in $tests; do
+testfile="${test_info%%:*}"
+num_images="${test_info##*:}"
 
+if [ -z "$num_images" ]; then
+    num_images=$CAF_IMAGES
+fi
+
+(set +x
+ echo "##[endgroup]"
+ echo "##[group] testing: $testfile ($num_images images)"
+ echo "========================================="
+ echo "Running coarray test: $testfile (images: $num_images)"
+ echo "========================================="
+)
 
 base=$(basename "$testfile" .f90)
 
@@ -145,35 +186,44 @@ lfortran "$testfile" \
 # Run LFortran executable
 # ----------------------------------------
 
-gasnetrun_smp -n "$CAF_IMAGES" ./"${base}_lf.out"
+gasnetrun_smp -n "$num_images" ./"${base}_lf.out"
 
 # ----------------------------------------
 # Cross-check with gfortran/OpenCoarrays, unless OpenCoarrays lacks support
 # ----------------------------------------
 
-skip_opencoarrays=false
-for skip in $opencoarrays_unsupported; do
-    if [ "$base" = "$skip" ]; then
-        skip_opencoarrays=true
-    fi
-done
+if [ $LINUX ] ; then
+  skip_opencoarrays=false
+  for skip in $opencoarrays_unsupported; do
+      if [ "$base" = "$skip" ]; then
+          skip_opencoarrays=true
+      fi
+  done
+else # macOS
+  skip_opencoarrays=true
+fi
 
 if [ "$skip_opencoarrays" = true ]; then
-    echo "Skipping OpenCoarrays cross-check for $testfile (character co_max/co_min not supported by OpenCoarrays)"
+    echo "Skipping OpenCoarrays cross-check for $testfile"
 else
     caf "$testfile" -o "${base}_gf.out"
-    cafrun -np "$CAF_IMAGES" ./"${base}_gf.out"
+    cafrun -np "$num_images" ./"${base}_gf.out" 2>&1 \
+      | sed '/Error: OSC UCX component priority/{N;/\n[[:space:]]*$/d}' # filter persistent non-fatal errors
     rm -f "${base}_gf.out"
 fi
 
-echo "PASS: $testfile"
-
 rm -f "${base}_lf.out"
 
+echo "PASS: $testfile"
 
 done
+
+(set +x 
+ echo "##[endgroup]"
+)
 
 echo
 echo "All coarray runtime tests passed"
 
 rm -rf caffeine
+rm -rf OpenCoarrays

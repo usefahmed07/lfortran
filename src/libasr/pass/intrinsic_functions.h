@@ -1253,14 +1253,16 @@ namespace StorageSize {
         ASR::ttype_t* type = ASRUtils::type_get_past_array(
                                  ASRUtils::type_get_past_allocatable(
                                      ASRUtils::type_get_past_pointer(arg_type)));
-        if (is_character(*arg_type)) {
+        
+        if (is_character(*type)) {
             int64_t len;
-            if(!ASRUtils::extract_value(ASR::down_cast<ASR::String_t>(
-                ASRUtils::type_get_past_array(arg_type))->m_len, len)){
-                return ASRUtils::EXPR(
-                    ASR::make_StringLen_t(al, loc, args[0], int64, nullptr));
+            //  Directly downcast 'type', as wrappers are already stripped
+            if(!ASRUtils::extract_value(ASR::down_cast<ASR::String_t>(type)->m_len, len)){
+                // Deferred length: return nullptr so it evaluates at runtime (codegen)
+                return nullptr; 
             }
             return make_ConstantWithType(make_IntegerConstant_t, 8*len, t1, loc);
+            
         } else if (ASR::is_a<ASR::StructType_t>(*type) ||
                    ASR::is_a<ASR::CPtr_t>(*type)) {
             auto [size_bytes, _align] = ASRUtils::compute_type_size_align(type);
@@ -1269,14 +1271,16 @@ namespace StorageSize {
                 return make_ConstantWithType(make_IntegerConstant_t, size_bytes * 8, t1, loc);
             }
             return make_ConstantWithType(make_IntegerConstant_t, 32, t1, loc);
-        } else if (is_complex(*arg_type)) {
-            int64_t kind = ASRUtils::extract_kind_from_ttype_t(arg_type);
+            
+        } else if (is_complex(*type)) { 
+            int64_t kind = ASRUtils::extract_kind_from_ttype_t(type);
             if (kind == 4) return make_ConstantWithType(make_IntegerConstant_t, 64, t1, loc);
             else if (kind == 8) return make_ConstantWithType(make_IntegerConstant_t, 128, t1, loc);
             else if (kind == 16) return make_ConstantWithType(make_IntegerConstant_t, 256, t1, loc);
             else return make_ConstantWithType(make_IntegerConstant_t, -1, t1, loc);
-        } else {
-            int64_t kind = ASRUtils::extract_kind_from_ttype_t(arg_type);
+            
+        } else { // Handles Integers, Reals, Logicals
+            int64_t kind = ASRUtils::extract_kind_from_ttype_t(type); // FIX: Use 'type'
             if (kind == 1) return make_ConstantWithType(make_IntegerConstant_t, 8, t1, loc);
             else if (kind == 2) return make_ConstantWithType(make_IntegerConstant_t, 16, t1, loc);
             else if (kind == 4) return make_ConstantWithType(make_IntegerConstant_t, 32, t1, loc);
@@ -5077,13 +5081,6 @@ namespace Leadz {
 
 namespace Ishftc {
 
-    static uint64_t cutoff_extra_bits(uint64_t num, uint32_t bits_size, uint32_t max_bits_size) {
-        if (bits_size == max_bits_size) {
-            return num;
-        }
-        return (num & ((1lu << bits_size) - 1lu));
-    }
-
     static ASR::expr_t *eval_Ishftc(Allocator &al, const Location &loc,
             ASR::ttype_t* t1, Vec<ASR::expr_t*> &args, diag::Diagnostics& diag) {
         uint64_t val = (uint64_t)ASR::down_cast<ASR::IntegerConstant_t>(args[0])->m_n;
@@ -5107,12 +5104,23 @@ namespace Ishftc {
             return nullptr;
         }
 
-        val = cutoff_extra_bits(val, bits_size, max_bits_size);
+        // Rotate only the low `bits_size` bits of val; leave the higher bits
+        // unchanged. The high bits are captured before the rotation and OR'd
+        // back into the result, so they survive even when bits_size < bit_width.
+        // 64-bit literals (0ULL/1ULL) keep the mask correct on LLP64 targets (MSVC).
+        uint64_t mask = (bits_size == max_bits_size)
+            ? ~0ULL
+            : ((1ULL << bits_size) - 1ULL);
+        uint64_t high = val & ~mask;
+        uint64_t low = val & mask;
         uint64_t result;
-        if (negative_shift) {
-            result = (val >> shift) | cutoff_extra_bits(val << (bits_size - shift), bits_size, max_bits_size);
+        if (shift == 0) {
+            // No rotation: the low bits stay where they are.
+            result = val;
+        } else if (negative_shift) {
+            result = high | ((low >> shift) | ((low << (bits_size - shift)) & mask));
         } else {
-            result = cutoff_extra_bits(val << shift, bits_size, max_bits_size) | ((val >> (bits_size - shift)));
+            result = high | (((low << shift) & mask) | (low >> (bits_size - shift)));
         }
         if (kind == 1) {
             result = static_cast<int8_t>(result);
@@ -6502,6 +6510,7 @@ namespace Repeat {
 
     static ASR::expr_t *eval_Repeat(Allocator &al, const Location &loc,
             ASR::ttype_t* /*t1*/, Vec<ASR::expr_t*> &args, diag::Diagnostics& /*diag*/) {
+        ASRUtils::ASRBuilder b(al, loc);
         char* str = ASR::down_cast<ASR::StringConstant_t>(expr_value(args[0]))->m_s;
         int64_t n = ASR::down_cast<ASR::IntegerConstant_t>(expr_value(args[1]))->m_n;
         size_t len = std::strlen(str);
@@ -6511,7 +6520,13 @@ namespace Repeat {
             result[i] = str[i%len];
         }
         result[new_len] = '\0';
-        return make_ConstantWithType(make_StringConstant_t, result, character(new_len), loc);
+        int char_kind = ASRUtils::extract_kind_from_ttype_t(ASRUtils::expr_type(args[0]));
+        ASR::ttype_t *return_type = b.String(
+            ASRUtils::EXPR(ASR::make_IntegerConstant_t(al, loc, new_len,
+                ASRUtils::TYPE(ASR::make_Integer_t(al, loc, 4)))),
+            ASR::string_length_kindType::ExpressionLength,
+            ASR::string_physical_typeType::DescriptorString, char_kind);
+        return make_ConstantWithType(make_StringConstant_t, result, return_type, loc);
     }
 
     static inline ASR::expr_t* instantiate_Repeat(Allocator &al, const Location &loc,
@@ -6525,11 +6540,12 @@ namespace Repeat {
             return b.Call(s, new_args, return_type, nullptr);
         }
         int char_kind = ASRUtils::extract_kind_from_ttype_t(arg_types[0]);
-        fill_func_arg("x", ASRUtils::TYPE(ASR::make_String_t(al, loc, char_kind, nullptr, 
-            ASR::string_length_kindType::AssumedLength,
-            ASR::string_physical_typeType::DescriptorString)));
+        fill_func_arg("x", b.String(nullptr, ASR::string_length_kindType::AssumedLength,
+            ASR::string_physical_typeType::DescriptorString, char_kind));
         fill_func_arg("y", arg_types[1]);
-        auto result = declare(fn_name, b.allocatable(b.String(nullptr, ASR::DeferredLength)), ReturnVar);
+        auto result = declare(fn_name,
+            b.allocatable(b.String(nullptr, ASR::string_length_kindType::DeferredLength,
+                ASR::string_physical_typeType::DescriptorString, char_kind)), ReturnVar);
         auto i = declare("i", int32, Local);
         auto j = declare("j", int32, Local);
         auto m = declare("m", int32, Local);
@@ -6554,8 +6570,8 @@ namespace Repeat {
         */
         body.push_back(al, b.Allocate(result, nullptr, 0, 
             ASRUtils::EXPR(ASR::make_IntegerBinOp_t(al, loc,
-                ASRUtils::EXPR(ASR::make_StringLen_t(al, loc, args[0], ASRUtils::expr_type(args[1]), nullptr)),
-                ASR::binopType::Mul, args[1], ASRUtils::expr_type(args[1]), nullptr))));
+                ASRUtils::EXPR(ASR::make_StringLen_t(al, loc, args[0], int64, nullptr)),
+                ASR::binopType::Mul, b.i2i_t(args[1], int64), int64, nullptr))));
         body.push_back(al, b.Assignment(m, b.StringLen(args[0])));
         body.push_back(al, b.Assignment(i, b.i32(1)));
         body.push_back(al, b.Assignment(j, m));
@@ -6606,7 +6622,11 @@ namespace Repeat {
             if (diag.has_error()) return nullptr;
             return_type = expr_type(m_value);
         } else {
-            return_type = allocatable_deferred_string();
+            ASRUtils::ASRBuilder b(al, loc);
+            int char_kind = ASRUtils::extract_kind_from_ttype_t(ASRUtils::expr_type(args[0]));
+            return_type = b.allocatable(b.String(nullptr,
+                ASR::string_length_kindType::DeferredLength,
+                ASR::string_physical_typeType::DescriptorString, char_kind));
         }
         
         for( size_t i = 0; i < 2; i++ ) {
