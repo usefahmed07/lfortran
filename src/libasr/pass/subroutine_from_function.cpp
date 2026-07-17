@@ -739,6 +739,34 @@ class ReplaceFunctionCallWithSubroutineCallVisitor:
             }
 
             bool value_and_target_allocatable_array = false;
+            if (!use_temp_var_for_return && !ASRUtils::is_allocatable(value) &&
+                ASRUtils::is_allocatable(target) &&
+                ASRUtils::is_array(ASRUtils::expr_type(target))) {
+                // Target may be unallocated, in which case it needs to be
+                // allocated here (with lower bound reset to 1, matching
+                // intrinsic assignment semantics) or it would be passed to
+                // the SubroutineCall unallocated and crash at runtime.
+                // Guard with a runtime `if (.not. allocated(target))` check
+                // so we never touch an *already*-allocated target here --
+                // that case must fall through to the existing shape/bounds
+                // checking machinery below instead of being silently
+                // reallocated.
+                Vec<ASR::stmt_t*> alloc_stmts; alloc_stmts.reserve(al, 2);
+                insert_allocate_stmt_for_array(al, target, value, &alloc_stmts);
+                if (alloc_stmts.size() > 0) {
+                    const Location& aloc = target->base.loc;
+                    ASR::ttype_t* logical_type = ASRUtils::TYPE(ASR::make_Logical_t(al, aloc, 4));
+                    Vec<ASR::expr_t*> allocated_args; allocated_args.reserve(al, 1);
+                    allocated_args.push_back(al, target);
+                    ASR::expr_t* is_allocated = ASRUtils::EXPR(ASR::make_IntrinsicImpureFunction_t(
+                        al, aloc, static_cast<int64_t>(ASRUtils::IntrinsicImpureFunctions::Allocated),
+                        allocated_args.p, allocated_args.n, 0, logical_type, nullptr));
+                    ASR::expr_t* not_allocated = ASRUtils::EXPR(ASR::make_LogicalNot_t(
+                        al, aloc, is_allocated, logical_type, nullptr));
+                    pass_result.push_back(al, ASRUtils::STMT(ASR::make_If_t(
+                        al, aloc, nullptr, not_allocated, alloc_stmts.p, alloc_stmts.size(), nullptr, 0)));
+                }
+            }
             if (ASRUtils::is_allocatable(value) && ASRUtils::is_allocatable(target)) {
                 // Pass in a temporary instead of the target, this is done for bounds checking in assignment to an array from a FunctionCall
                 if (ASRUtils::is_array(ASRUtils::expr_type(target)) &&

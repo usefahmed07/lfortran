@@ -5264,3 +5264,12 @@ filename = "coarray_var_name_collision_01.f90"
 fortran = true
 pass = "coarray"
 options = "--coarray=true"
+
+[[test]]
+filename = "realloc_lhs_bounds_11609.f90"
+run = true
+
+[[test]]
+filename = "realloc_lhs_bounds_11609_no_realloc.f90"
+run = true
+options = "--realloc-lhs-arrays=false"
