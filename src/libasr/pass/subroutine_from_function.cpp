@@ -759,8 +759,13 @@ class ReplaceFunctionCallWithSubroutineCallVisitor:
                 if (alloc_stmts.size() > 0) {
                     const Location& aloc = target->base.loc;
                     ASR::ttype_t* logical_type = ASRUtils::TYPE(ASR::make_Logical_t(al, aloc, 4));
+                    ASRUtils::ExprStmtDuplicator target_duplicator(al);
+                    target_duplicator.success = true;
+                    ASR::expr_t* target_copy = target_duplicator.duplicate_expr(target);
+                    LCOMPILERS_ASSERT(target_duplicator.success);
+
                     Vec<ASR::expr_t*> allocated_args; allocated_args.reserve(al, 1);
-                    allocated_args.push_back(al, target);
+                    allocated_args.push_back(al, target_copy);
                     ASR::expr_t* is_allocated = ASRUtils::EXPR(ASR::make_IntrinsicImpureFunction_t(
                         al, aloc, static_cast<int64_t>(ASRUtils::IntrinsicImpureFunctions::Allocated),
                         allocated_args.p, allocated_args.n, 0, logical_type, nullptr));
