@@ -741,7 +741,10 @@ class ReplaceFunctionCallWithSubroutineCallVisitor:
             bool value_and_target_allocatable_array = false;
             if (!use_temp_var_for_return && !ASRUtils::is_allocatable(value) &&
                 ASRUtils::is_allocatable(target) &&
-                ASRUtils::is_array(ASRUtils::expr_type(target))) {
+                ASRUtils::is_array(ASRUtils::expr_type(target)) &&
+                !(ASR::is_a<ASR::FunctionCall_t>(*value) &&
+                  ASRUtils::is_elemental(ASR::down_cast<ASR::FunctionCall_t>(value)->m_name) &&
+                  ASRUtils::is_array(ASRUtils::expr_type(value)))) {
                 // Target may be unallocated, in which case it needs to be
                 // allocated here (with lower bound reset to 1, matching
                 // intrinsic assignment semantics) or it would be passed to
