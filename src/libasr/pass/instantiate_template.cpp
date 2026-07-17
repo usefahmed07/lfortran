@@ -1945,6 +1945,34 @@ bool check_restriction(std::map<std::string, std::pair<ASR::ttype_t*, ASR::symbo
             return false;
         }
     }
+    ASR::FunctionType_t *f_type = ASR::down_cast<ASR::FunctionType_t>(f->m_function_signature);
+    ASR::FunctionType_t *arg_type_sig = ASR::down_cast<ASR::FunctionType_t>(arg->m_function_signature);
+    if (f_type->m_pure && !arg_type_sig->m_pure) {
+        if (report) {
+            diagnostics.add(diag::Diagnostic(
+                "The restriction argument " + arg_name + " must be pure",
+                diag::Level::Error, diag::Stage::Semantic, {
+                    diag::Label("requires a pure function", {loc}),
+                    diag::Label(arg_name + " is not pure", {arg->base.base.loc})
+                }
+            ));
+            semantic_abort();
+        }
+        return false;
+    }
+    if (f_type->m_elemental && !arg_type_sig->m_elemental) {
+        if (report) {
+            diagnostics.add(diag::Diagnostic(
+                "The restriction argument " + arg_name + " must be elemental",
+                diag::Level::Error, diag::Stage::Semantic, {
+                    diag::Label("requires an elemental function", {loc}),
+                    diag::Label(arg_name + " is not elemental", {arg->base.base.loc})
+                }
+            ));
+            semantic_abort();
+        }
+        return false;
+    }
     symbol_subs[f_name] = sym_arg;
     return true;
 }
