@@ -5258,6 +5258,7 @@ fortran = true
 pass = "coarray"
 options = "--coarray=true"
 
+
 [[test]]
 filename = "coarray_var_name_collision_01.f90"
 fortran = true
