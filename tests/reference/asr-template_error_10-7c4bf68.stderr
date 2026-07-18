@@ -1,0 +1,12 @@
+semantic error: The restriction argument lt_my_type must be pure
+  --> tests/errors/template_error_10.f90:55:33
+   |
+55 |     instantiate apply_t(my_type,lt_my_type), only : my_apply => apply_lt
+   |                                 ^^^^^^^^^^ requires a pure function
+   |
+12 |        impure elemental function lt_my_type(lhs, rhs) result(res)
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+...
+   |
+16 |        end function
+   | ...^^^^^^^^^^^^^^^^ lt_my_type is not pure
