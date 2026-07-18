@@ -418,7 +418,7 @@ coarrayarg = (expr? start, expr? end, expr? step, codimension_type star)
 
 keyword = (identifier arg, expr value)
 
-struct_member = (identifier name, fnarg* args)
+struct_member = (identifier name, fnarg* args, coarrayarg* coargs, keyword* cokw)
 
 bind = Bind(expr* args, keyword* kwargs)
 

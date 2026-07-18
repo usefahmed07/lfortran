@@ -789,6 +789,8 @@
         [(Associate
             0
             pp1 [(c1
+            []
+            []
             [])]
             sub1
             ()
@@ -796,6 +798,8 @@
         (Associate
             0
             pp2 [(c1
+            []
+            []
             [])]
             func1
             ()
@@ -803,6 +807,8 @@
         (Associate
             0
             pp3 [(c1
+            []
+            []
             [])]
             func2
             (TriviaNode
@@ -815,6 +821,8 @@
             0
             pp1
             [(c1
+            []
+            []
             [])]
             [(()
             10
@@ -849,6 +857,8 @@
                 (FuncCallOrArray
                     pp2
                     [(c1
+                    []
+                    []
                     [])]
                     []
                     []
@@ -870,6 +880,8 @@
             (FuncCallOrArray
                 pp3
                 [(c1
+                []
+                []
                 [])]
                 [(()
                 (FuncCallOrArray

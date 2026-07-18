@@ -1432,12 +1432,43 @@ void CONVERT_FNARRAYARG_FNARG(Allocator &al,
             out = p.m_a.make_new<struct_member_t>(); \
             out->m_name = name2char(id); \
             out->m_args = nullptr; \
-            out->n_args = 0;
+            out->n_args = 0; \
+            out->m_coargs = nullptr; \
+            out->n_coargs = 0; \
+            out->m_cokw = nullptr; \
+            out->n_cokw = 0;
 
 #define STRUCT_MEMBER2(out, id, member) \
             out = p.m_a.make_new<struct_member_t>(); \
             out->m_name = name2char(id); \
-            CONVERT_FNARRAYARG_FNARG(p.m_a, *out, member);
+            CONVERT_FNARRAYARG_FNARG(p.m_a, *out, member); \
+            out->m_coargs = nullptr; \
+            out->n_coargs = 0; \
+            out->m_cokw = nullptr; \
+            out->n_cokw = 0;
+
+#define STRUCT_MEMBER3(out, id, coargs) \
+            out = p.m_a.make_new<struct_member_t>(); \
+            out->m_name = name2char(id); \
+            out->m_args = nullptr; \
+            out->n_args = 0; \
+            { \
+                Vec<coarrayarg_t> coarr_; \
+                coarr_.reserve(p.m_a, coargs.size()); \
+                Vec<keyword_t> coarrkw_; \
+                coarrkw_.reserve(p.m_a, coargs.size()); \
+                for (auto &item : coargs) { \
+                    if (item.keyword) { \
+                        coarrkw_.push_back(p.m_a, item.kw); \
+                    } else { \
+                        coarr_.push_back(p.m_a, item.arg); \
+                    } \
+                } \
+                out->m_coargs = coarr_.p; \
+                out->n_coargs = coarr_.size(); \
+                out->m_cokw = coarrkw_.p; \
+                out->n_cokw = coarrkw_.size(); \
+            }
 
 #define NAME1(out, id, member, l) \
             out = make_Name_t(p.m_a, l, \

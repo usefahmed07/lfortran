@@ -77,6 +77,8 @@
                     [(FuncCallOrArray
                         rgb
                         [(colours
+                        []
+                        []
                         [])]
                         [(()
                         i
@@ -103,6 +105,8 @@
             ()
             [(String "colours%rgb : " ())
             rgb [(colours
+            []
+            []
             [])]]
             ()
         )
@@ -114,6 +118,8 @@
                 []
                 [(()
                 (/= rgb [(colours
+                []
+                []
                 [])] (ArrayInitializer
                     ()
                     ()

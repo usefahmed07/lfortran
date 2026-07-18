@@ -20066,12 +20066,55 @@ public:
                 member_args = x_m_member[1].m_args;
                 member_n_args = x_m_member[1].n_args;
             }
+            if (x_m_member[0].n_coargs > 0) {
+                // Coindexed struct access, e.g. x[1]%val
+                // Single-image mode: validate the coindex, then ignore the
+                // cosubscripts (same convention as visit_CoarrayRef).
+                std::string base_name = to_lower(x_m_member[0].m_name);
+                ASR::symbol_t* v1 = current_scope->resolve_symbol(base_name);
+                if (!v1) {
+                    diag.add(Diagnostic(
+                        "Variable '" + base_name + "' is not declared",
+                        Level::Error, Stage::Semantic, {Label("", {loc})}));
+                    throw SemanticAbort();
+                }
+                ASR::symbol_t* f1 = ASRUtils::symbol_get_past_external(v1);
+                if (!ASRUtils::is_coarray(f1)) {
+                    diag.add(Diagnostic(
+                        "Variable '" + base_name +
+                        "' is not a coarray; coindex notation [..] requires a codimension attribute",
+                        Level::Error, Stage::Semantic, {Label("", {loc})}));
+                    throw SemanticAbort();
+                }
+                int64_t var_corank = ASRUtils::symbol_corank(f1);
+                ASR::Variable_t* var1 = ASR::is_a<ASR::Variable_t>(*f1)
+                    ? ASR::down_cast<ASR::Variable_t>(f1) : nullptr;
+                if (var1 && var1->n_codims > 0) {
+                    var_corank = var1->n_codims;
+                }
+                if (var_corank > 0 && (int64_t)x_m_member[0].n_coargs != var_corank) {
+                    diag.add(Diagnostic(
+                        "Coarray '" + base_name + "' has corank " + std::to_string(var_corank) +
+                        " but " + std::to_string(x_m_member[0].n_coargs) + " coindices were provided",
+                        Level::Error, Stage::Semantic, {Label("", {loc})}));
+                    throw SemanticAbort();
+                }
+            }
             tmp = (ASR::asr_t*) replace_with_common_block_variables(
                 ASRUtils::EXPR(this->resolve_variable2(loc, to_lower(x_m_id),
                 to_lower(x_m_member[0].m_name), scope, x_m_member[0].m_args,
                 x_m_member[0].n_args, member_args, member_n_args)));
         } else {
             SymbolTable* scope = current_scope;
+            for (size_t ci = 0; ci < x_n_member; ci++) {
+                if (x_m_member[ci].n_coargs > 0) {
+                    diag.add(Diagnostic(
+                        "Coindex notation '[...]' in the middle of a multi-level "
+                        "derived-type member chain is not yet supported",
+                        Level::Error, Stage::Semantic, {Label("", {loc})}));
+                    throw SemanticAbort();
+                }
+            }
             tmp = (ASR::asr_t*) replace_with_common_block_variables(
                     ASRUtils::EXPR(this->resolve_variable2(loc,
                     to_lower(x_m_member[1].m_name), to_lower(x_m_member[0].m_name), scope,

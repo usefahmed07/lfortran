@@ -284,8 +284,12 @@
             0
             [(DataStmtSet
                 [age [(yourname
+                []
+                []
                 [])]
                 fullname [(yourname
+                []
+                []
                 [])]]
                 [35
                 (String "abc" ())]
@@ -615,6 +619,8 @@
             ()
             [(String "Your name is: " ())
             fullname [(yourname
+            []
+            []
             [])]]
             ()
         )
@@ -623,6 +629,8 @@
             ()
             [(String "Your age is: " ())
             age [(yourname
+            []
+            []
             [])]]
             ()
         )

@@ -2571,6 +2571,7 @@ struct_member_star
 struct_member
     : id "%" { STRUCT_MEMBER1($$, $1); }
     | id "(" fnarray_arg_list_opt ")" "%" { STRUCT_MEMBER2($$, $1, $3); }
+    | id "[" coarray_arg_list "]" "%" { STRUCT_MEMBER3($$, $1, $3); }
     ;
 
 fnarray_arg_list_opt
