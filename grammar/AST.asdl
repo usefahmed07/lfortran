@@ -70,7 +70,7 @@ unit_decl2
         program_unit* contains)
     | Enum(decl_attribute* attr, trivia? trivia, unit_decl2* items)
     | Instantiate(identifier name, decl_attribute* args, use_symbol* symbols)
-    | Requirement(identifier name, identifier* namelist, unit_decl2* decl,
+    | Requirement(identifier name, arg* namelist, unit_decl2* decl,
         program_unit* funcs)
     | Require(unit_require* reqs)
     | Union(identifier name, trivia? trivia, decl_attribute* attrtype, unit_decl2* items)
