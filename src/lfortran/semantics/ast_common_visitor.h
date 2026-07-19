@@ -20099,6 +20099,19 @@ public:
                         Level::Error, Stage::Semantic, {Label("", {loc})}));
                     throw SemanticAbort();
                 }
+                if (compiler_options.po.coarray) {
+                    // In multi-image mode, dropping the coindex here would silently
+                    // produce wrong code: `x[1]%val` requires an actual remote-image
+                    // access (prif_get*), not a local read of `x%val`. Until that
+                    // codegen exists, refuse rather than compile something incorrect.
+                    diag.add(Diagnostic(
+                        "coindexed derived-type component reference '" + base_name +
+                        "[...]%...' is not yet supported with --coarray (multi-image mode)",
+                        Level::Error, Stage::Semantic, {Label("", {loc})}));
+                    throw SemanticAbort();
+                }
+                // Single-image mode (default, no --coarray): validate the coindex,
+                // then ignore the cosubscripts, same convention as visit_CoarrayRef.
             }
             tmp = (ASR::asr_t*) replace_with_common_block_variables(
                 ASRUtils::EXPR(this->resolve_variable2(loc, to_lower(x_m_id),

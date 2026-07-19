@@ -5268,8 +5268,11 @@ options = "--coarray=true"
 [[test]]
 filename = "coarray_member_access_01.f90"
 fortran = true
-pass = "coarray"
-options = "--coarray=true"
 [[test]]
 filename = "errors/missing_include_01.f90"
 ast = true
+
+[[test]]
+filename = "errors/coarray_member_access_multi_image_01.f90"
+asr = true
+options = "--coarray=true"

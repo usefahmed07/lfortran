@@ -1,0 +1,5 @@
+semantic error: coindexed derived-type component reference 'x[...]%...' is not yet supported with --coarray (multi-image mode)
+  --> tests/errors/coarray_member_access_multi_image_01.f90:10:18
+   |
+10 |         print *, x[1]%val
+   |                  ^^^^^^^^ 

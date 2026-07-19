@@ -1,0 +1,13 @@
+{
+    "basename": "fortran-coarray_member_access_01-bd67f4a",
+    "cmd": "lfortran --show-fortran --no-color {infile} -o {outfile}",
+    "infile": "tests/coarray_member_access_01.f90",
+    "infile_hash": "f9e0894abe4f86763d9c7c94c98ac1499d6b7b0b9241068dbd548739",
+    "outfile": null,
+    "outfile_hash": null,
+    "stdout": "fortran-coarray_member_access_01-bd67f4a.f90",
+    "stdout_hash": "e37ddf44cfbb911c4c7b422fe04b5a5bd594c7234246939853b70cf5",
+    "stderr": null,
+    "stderr_hash": null,
+    "returncode": 0
+}
