@@ -1,3 +1,0 @@
-  File "tests/errors/runtime_stacktrace_02.f90", line 201
-    call sub199()
-STOP 1
