@@ -1864,6 +1864,8 @@ RUN(NAME parameter_15 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc fortran)
 RUN(NAME parameter_16 LABELS gfortran llvm)
 RUN(NAME parameter_17 LABELS gfortran llvm)
 RUN(NAME parameter_18 LABELS gfortran llvm)
+RUN(NAME parameter_19 LABELS gfortran llvm)
+RUN(NAME parameter_20 LABELS gfortran llvm)
 
 RUN(NAME fortuno_01 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc)
 
@@ -2006,6 +2008,7 @@ RUN(NAME bindc_51 LABELS gfortran llvm)
 RUN(NAME bindc_52 LABELS gfortran llvm)
 # Extension: BIND(C) character(len>1); GFortran rejects, so llvm only
 RUN(NAME bindc_53 LABELS llvm)
+RUN(NAME bindc_54 LABELS gfortran llvm)
 RUN(NAME bindc_iso_fb_01 LABELS gfortran llvm flang EXTRAFILES bindc_iso_fb_01c.c)
 RUN(NAME bindc_iso_fb_02 LABELS gfortran llvm flang EXTRAFILES bindc_iso_fb_02c.c)
 RUN(NAME bindc_iso_fb_03 LABELS gfortran llvm flang EXTRAFILES bindc_iso_fb_03c.c)
