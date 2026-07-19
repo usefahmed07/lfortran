@@ -1,0 +1,13 @@
+{
+    "basename": "run_dbg-runtime_stacktrace_02-0b9feb8",
+    "cmd": "lfortran {infile} -g --no-color",
+    "infile": "tests/errors/runtime_stacktrace_02.f90",
+    "infile_hash": "26a0ea8ea3003a4017e0936ff5d47571a59aea76a5e34ffb05dd1a62",
+    "outfile": null,
+    "outfile_hash": null,
+    "stdout": null,
+    "stdout_hash": null,
+    "stderr": "run_dbg-runtime_stacktrace_02-0b9feb8.stderr",
+    "stderr_hash": "e6ee4df64acbf5db9c3f3cde02b9089e973c3ceba20714545565c989",
+    "returncode": 1
+}

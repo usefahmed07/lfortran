@@ -4346,6 +4346,10 @@ filename = "errors/runtime_stacktrace_01.f90"
 run_with_dbg = true
 
 [[test]]
+filename = "errors/runtime_stacktrace_02.f90"
+run_with_dbg = true
+
+[[test]]
 filename = "../integration_tests/legacy_array_sections_01.f90"
 llvm = true
 options = "--legacy-array-sections"

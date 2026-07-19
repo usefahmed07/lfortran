@@ -13350,6 +13350,13 @@ void get_local_info_dwarfdump(struct Stacktrace *d) {
     bool address = true;
     uint32_t j = 0;
     for (uint32_t i = 0; i < size; i++) {
+        if (d->stack_size >= LCOMPILERS_MAX_STACKTRACE_LENGTH) {
+            // Prevent writing past the fixed-size addresses/line_numbers
+            // arrays when the debug line table has more entries than
+            // LCOMPILERS_MAX_STACKTRACE_LENGTH (e.g. when linking against
+            // large external libraries built with a different compiler).
+            break;
+        }
         if (file_contents[i] == '\n') {
             memset(s, '\0', sizeof(s));
             j = 0;
