@@ -4268,6 +4268,10 @@ ast = true
 filename = "parser/data_stmt_with_implied_do_loop.f"
 ast = true
 
+[[test]]
+filename = "parser/fixed_form_infer_default_01.f"
+ast = true
+
 # Parser errors
 
 [[test]]

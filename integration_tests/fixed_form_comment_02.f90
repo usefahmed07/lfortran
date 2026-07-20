@@ -2,8 +2,7 @@ C***********************************************************************
 C     Comment lines that begin with a comment indicator (C, c, or *)
 C     immediately followed by more of the same or other characters
 C     (no space required) must still be recognized as full-line
-C     comments in fixed form, and a `.f` file must be treated as
-C     fixed-form by default, without requiring --fixed-form.
+C     comments in fixed form.
 C***********************************************************************
 c-------------------------------------------------------------------
 *     A line starting with '*' is also a comment line.
