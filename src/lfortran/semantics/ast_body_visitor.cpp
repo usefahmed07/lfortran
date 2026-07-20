@@ -2751,7 +2751,13 @@ public:
                 ASR::symbol_t *s = sym_pair.second;
                 std::string s_name = ASRUtils::symbol_name(s);
                 if (ASR::is_a<ASR::Function_t>(*s) && !ASRUtils::is_template_arg(sym, s_name)) {
-                    instantiate_body(al, type_subs, symbol_subs, current_scope->resolve_symbol(s_name), s);
+                    ASR::symbol_t *new_sym = current_scope->resolve_symbol(s_name);
+                    // If symtab-stage instantiation failed (e.g. a restriction
+                    // check aborted under --continue-compilation), the symbol
+                    // was never created; skip instead of crashing.
+                    if (new_sym != nullptr && ASR::is_a<ASR::Function_t>(*new_sym)) {
+                        instantiate_body(al, type_subs, symbol_subs, new_sym, s);
+                    }
                 }
             }
         } else {
@@ -2762,7 +2768,11 @@ public:
                 if (use_symbol->m_local_rename) {
                     new_s_name = to_lower(use_symbol->m_local_rename);
                 }
-                instantiate_body(al, type_subs, symbol_subs, current_scope->resolve_symbol(new_s_name), s);
+                ASR::symbol_t *new_sym = current_scope->resolve_symbol(new_s_name);
+                // Same guard as above.
+                if (new_sym != nullptr && ASR::is_a<ASR::Function_t>(*new_sym)) {
+                    instantiate_body(al, type_subs, symbol_subs, new_sym, s);
+                }
             }
         }
 

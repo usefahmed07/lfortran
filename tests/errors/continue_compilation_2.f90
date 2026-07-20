@@ -123,12 +123,65 @@ end module pure_io_mod
 
 
 
+
+module continue_compilation_2_lt_m
+    implicit none
+    private
+    public :: cc2_my_type, cc2_lt_my_type
+
+    type cc2_my_type
+        real :: d
+    end type
+
+contains
+
+    impure elemental function cc2_lt_my_type(lhs, rhs) result(res)
+        type(cc2_my_type), intent(in) :: lhs, rhs
+        logical :: res
+        res = lhs%d < rhs%d
+    end function
+
+end module
+
+module continue_compilation_2_template_apply_m
+    use continue_compilation_2_lt_m
+    implicit none
+    private
+    public :: cc2_apply_t
+
+    requirement cc2_op_r(T, U, V, op_func)
+        type, deferred :: T
+        type, deferred :: U
+        type, deferred :: V
+        pure elemental function op_func(lhs, rhs) result(res)
+            type(T), intent(in) :: lhs
+            type(U), intent(in) :: rhs
+            type(V) :: res
+        end function
+    end requirement
+
+    template cc2_apply_t(T, lt)
+        require :: cc2_op_r(T, T, logical, lt)
+        private
+        public :: cc2_apply_lt
+    contains
+        pure function cc2_apply_lt(lhs, rhs) result(res)
+            type(T), intent(inout) :: lhs(:)
+            type(T), intent(inout) :: rhs(:)
+            type(logical) :: res
+            res = all ( lt(lhs,rhs) )
+        end function
+    end template
+end module
+
 ! Only put declarations and statements here, no subroutines (those go above).
 program continue_compilation_2
     use continue_compilation_2_mod
     
     use iso_c_binding, only: c_ptr, c_f_pointer
     use Geometry
+    use continue_compilation_2_lt_m
+    use continue_compilation_2_template_apply_m
     implicit real(a-z)
 
     ! Put declarations below without empty lines
@@ -284,6 +337,9 @@ program continue_compilation_2
 
 
 
+
+    !pure_elemental_restriction_cc
+    instantiate cc2_apply_t(cc2_my_type, cc2_lt_my_type), only : cc2_my_apply => cc2_apply_lt
 
     ! Use the space above to insert new declarations, and remove the line, so
     ! that the lines below do not shift, to keep the diff minimal.
