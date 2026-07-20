@@ -1,18 +1,24 @@
-module caller_mod
+module m1
     implicit none
-    type :: caller_t
-        integer :: id
-    end type caller_t
+    type :: runner
+        procedure(), nopass, pointer :: caller => null()
+    contains
+    end type
 contains
     subroutine set_caller(this, caller)
-        type(caller_t), intent(inout) :: this
-        type(caller_t), intent(in) :: caller
-        this%id = caller%id
-    end subroutine set_caller
-end module caller_mod
+        class(runner), intent(inout) :: this
+        procedure() :: caller
+        this%caller => caller
+    end subroutine
+end module
 
-program intent_inout_missing_arg
-    use caller_mod
-    type(caller_t) :: upper_caller
+program p
+    use m1
+    implicit none
+    type(runner) :: br
     call set_caller(upper_caller)
-end program intent_inout_missing_arg
+contains
+    subroutine upper_caller(a)
+        class(*), intent(in) :: a
+    end subroutine
+end program

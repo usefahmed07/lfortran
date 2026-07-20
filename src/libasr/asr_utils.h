@@ -1743,9 +1743,6 @@ static inline bool is_modifiable_actual_argument_expr(ASR::expr_t* a_value) {
             ASR::symbol_t* v_sym = ASRUtils::symbol_get_past_external(
                 ASR::down_cast<ASR::Var_t>(a_value)->m_v);
             if (!ASR::is_a<ASR::Variable_t>(*v_sym)) {
-                // Not a plain variable (e.g. a procedure/function symbol
-                // passed positionally where a variable was expected) --
-                // cannot be treated as a modifiable variable.
                 return false;
             }
             ASR::Variable_t* variable_t = ASR::down_cast<ASR::Variable_t>(v_sym);
