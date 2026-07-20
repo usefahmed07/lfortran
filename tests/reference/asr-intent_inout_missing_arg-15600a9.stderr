@@ -1,0 +1,5 @@
+semantic error: Required argument `caller` at position 2 is missing in procedure call
+  --> tests/errors/intent_inout_missing_arg.f90:17:21
+   |
+17 |     call set_caller(upper_caller)
+   |                     ^^^^^^^^^^^^ 
