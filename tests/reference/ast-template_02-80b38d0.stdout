@@ -17,8 +17,8 @@
         )]
         [(Requirement
             eq
-            [t
-            ne]
+            [(t)
+            (ne)]
             [(DerivedType
                 t
                 []

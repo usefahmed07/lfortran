@@ -46,7 +46,7 @@
         )
         (Requirement
             r
-            [t]
+            [(t)]
             [(DerivedType
                 t
                 []
@@ -199,8 +199,6 @@
                     0
                     r
                     fst [(p
-                    []
-                    []
                     [])]
                     ()
                 )]
@@ -263,8 +261,6 @@
                     0
                     r
                     snd [(p
-                    []
-                    []
                     [])]
                     ()
                 )]
@@ -369,8 +365,6 @@
             [(Assignment
                 0
                 fst [(ti
-                []
-                []
                 [])]
                 1
                 ()
@@ -395,8 +389,6 @@
             (Assignment
                 0
                 snd [(ti
-                []
-                []
                 [])]
                 2
                 ()
@@ -421,8 +413,6 @@
             (Assignment
                 0
                 fst [(tr
-                []
-                []
                 [])]
                 (Real "1.")
                 ()
@@ -447,8 +437,6 @@
             (Assignment
                 0
                 snd [(tr
-                []
-                []
                 [])]
                 (Real "2.")
                 ()

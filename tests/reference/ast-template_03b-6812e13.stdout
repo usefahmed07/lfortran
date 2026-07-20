@@ -10,10 +10,10 @@
         []
         [(Requirement
             op
-            [T
-            U
-            V
-            op]
+            [(T)
+            (U)
+            (V)
+            (op)]
             [(DerivedType
                 T
                 []
