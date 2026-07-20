@@ -5273,3 +5273,7 @@ run = true
 filename = "realloc_lhs_bounds_11609_no_realloc.f90"
 run = true
 options = "--realloc-lhs-arrays=false"
+
+[[test]]
+filename = "errors/missing_include_01.f90"
+ast = true
