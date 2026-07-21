@@ -2754,8 +2754,11 @@ public:
                     ASR::symbol_t *new_sym = current_scope->resolve_symbol(s_name);
                     // If symtab-stage instantiation failed (e.g. a restriction
                     // check aborted under --continue-compilation), the symbol
-                    // was never created; skip instead of crashing.
-                    if (new_sym != nullptr && ASR::is_a<ASR::Function_t>(*new_sym)) {
+                    // was never created; skip instead of crashing. Do not
+                    // additionally restrict by symbol type here: nested
+                    // templates (ASR::Template_t) and other non-Function
+                    // symbols also need instantiate_body() to run on them.
+                    if (new_sym != nullptr) {
                         instantiate_body(al, type_subs, symbol_subs, new_sym, s);
                     }
                 }
@@ -2769,8 +2772,8 @@ public:
                     new_s_name = to_lower(use_symbol->m_local_rename);
                 }
                 ASR::symbol_t *new_sym = current_scope->resolve_symbol(new_s_name);
-                // Same guard as above.
-                if (new_sym != nullptr && ASR::is_a<ASR::Function_t>(*new_sym)) {
+                // Same guard as above: only skip on nullptr.
+                if (new_sym != nullptr) {
                     instantiate_body(al, type_subs, symbol_subs, new_sym, s);
                 }
             }
