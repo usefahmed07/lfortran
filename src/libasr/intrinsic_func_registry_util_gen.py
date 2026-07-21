@@ -1177,7 +1177,7 @@ def add_create_func_return_src(func_name):
         if valid_kinds:
             cond = " && ".join(f"kind != {k}" for k in valid_kinds)
             kinds_str = ", ".join(str(k) for k in valid_kinds)
-            src += indent * 3 +     f"if ({cond}) {{\n"
+            src += indent * 3 +     f"if (ASR::is_a<ASR::IntegerConstant_t>(*args[1]) && ({cond})) {{\n"
             src += indent * 4 +         f'append_error(diag, "Unsupported {func_name} kind \'" + std::to_string(kind) + "\' in `{func_name.lower()}()`, must be one of: {kinds_str}", args[1]->base.loc);\n'
             src += indent * 4 +         "return nullptr;\n"
             src += indent * 3 +     "}\n"
