@@ -432,6 +432,8 @@ RUN(NAME ilp64_logical_read_01 LABELS gfortran llvm EXTRA_ARGS -fdefault-integer
 RUN(NAME ilp64_complex_literal_01 LABELS gfortran llvm EXTRA_ARGS -fdefault-integer-8 GFORTRAN_ARGS -fdefault-integer-8)
 RUN(NAME ilp64_logical_compare_01 LABELS gfortran llvm EXTRA_ARGS -fdefault-integer-8 GFORTRAN_ARGS -fdefault-integer-8)
 
+RUN(NAME procedure_pointer_array_01 LABELS gfortran llvm)
+
 RUN(NAME label_01 LABELS gfortran llvm)
 RUN(NAME format_hollerith_01 LABELS gfortran llvm)
 
@@ -3309,6 +3311,7 @@ RUN(NAME boz_02 LABELS llvm llvm_wasm llvm_wasm_emcc) #remove gfortran label, as
 RUN(NAME cmd_01 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc)
 RUN(NAME cmd_02 LABELS gfortran llvm)
 RUN(NAME cmd_03 LABELS gfortran llvm) # get_command_argument loop until empty
+RUN(NAME cmd_04 LABELS gfortran llvm) # iargc/getarg legacy F77 aliases
 
 RUN(NAME flip_sign LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm)
 RUN(NAME div_to_mul LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm)
