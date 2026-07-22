@@ -2271,6 +2271,7 @@ RUN(NAME custom_operator_16 LABELS gfortran llvm)
 RUN(NAME custom_operator_17 LABELS gfortran llvm EXTRA_ARGS --realloc-lhs-arrays)
 RUN(NAME custom_operator_18 LABELS gfortran llvm EXTRA_ARGS --realloc-lhs-arrays)
 RUN(NAME custom_operator_19 LABELS gfortran llvm)
+RUN(NAME custom_operator_20 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc)
 
 RUN(NAME types_07 LABELS gfortran)
 RUN(NAME types_08 LABELS gfortran)
@@ -2529,6 +2530,7 @@ RUN(NAME derived_types_150 LABELS gfortran llvm) # SEQUENCE char(len>1) inline +
 # assignment(=) in one module breaks resolution under LFortran.
 RUN(NAME derived_types_151 LABELS gfortran llvm EXTRA_ARGS --implicit-interface)
 RUN(NAME derived_types_152 LABELS gfortran llvm EXTRA_ARGS --implicit-interface)
+RUN(NAME derived_types_153 LABELS gfortran llvm EXTRA_ARGS --implicit-interface)
 RUN(NAME defined_assignment_01 LABELS llvm flang)
 RUN(NAME defined_assignment_free_interface_01 LABELS gfortran llvm flang)
 
@@ -3999,6 +4001,7 @@ RUN(NAME c_ptr_15 LABELS gfortran llvm)
 RUN(NAME c_ptr_16 LABELS gfortran llvm EXTRAFILES c_ptr_16_module.f90)
 RUN(NAME c_ptr_17 LABELS gfortran llvm EXTRAFILES c_ptr_17_module.f90)
 RUN(NAME target_01 LABELS gfortran llvm)
+RUN(NAME c_f_pointer_01 LABELS gfortran llvm)
 
 RUN(NAME c_f_proc_ptr_01 LABELS gfortran llvm EXTRAFILES c_f_proc_ptr_01.c) # c_f_procpointer
 
