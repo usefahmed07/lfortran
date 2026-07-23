@@ -87,6 +87,15 @@ private:
                 code = CastingUtil::perform_casting(
                     code, int32_type, al, loc);
             }
+        } else if (code && !ASR::is_a<ASR::String_t>(
+                *ASRUtils::type_get_past_allocatable_pointer(ASRUtils::expr_type(code)))) {
+            diag.add(Diagnostic(
+                "Stop code must be of type INTEGER or CHARACTER, found `" +
+                    ASRUtils::type_to_str_python_expr(ASRUtils::expr_type(code), code) + "`",
+                Level::Error, Stage::Semantic, {
+                    Label("", {loc})
+                }));
+            throw SemanticAbort();
         }
         return code;
     }
@@ -7622,6 +7631,7 @@ public:
                 if ( x.n_args >= 1 ) {
                     visit_expr(*x.m_args[0].m_end);
                     arg = ASRUtils::EXPR(tmp);
+                    arg = cast_stop_code_to_int32(arg, x.base.base.loc);
                 }
                 tmp = ASR::make_Stop_t( al, x.base.base.loc, arg );
                 return;
