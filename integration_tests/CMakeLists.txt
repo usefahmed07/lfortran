@@ -1139,6 +1139,7 @@ RUN(NAME namelist_34 LABELS gfortran llvm)
 
 
 RUN(NAME namelist_35 LABELS gfortran llvm)
+RUN(NAME namelist_36 LABELS gfortran llvm)
 
 RUN(NAME nested_namelist_01 LABELS gfortran llvm)
 
@@ -2337,6 +2338,7 @@ RUN(NAME logical3 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm)
 RUN(NAME logical4 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm fortran)
 RUN(NAME logical_casting_01 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc fortran
     EXTRA_ARGS --logical-casting NO_STD_F23)
+RUN(NAME logical_array_cast_01 LABELS gfortran llvm)
 
 RUN(NAME logical_kind_01 LABELS gfortran llvm)
 RUN(NAME logical_kind_02 LABELS gfortran llvm)
@@ -4089,6 +4091,10 @@ RUN(NAME cpp_pre_17 LABELS gfortran llvm
     EXTRA_ARGS --cpp
     GFORTRAN_ARGS -cpp)
 
+RUN(NAME cpp_pre_18 LABELS gfortran llvm
+    EXTRA_ARGS --cpp
+    GFORTRAN_ARGS -cpp)
+
 RUN(NAME dabs_01 LABELS gfortran llvmImplicit)
 
 RUN(NAME minpack_03 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc)
@@ -4954,3 +4960,4 @@ RUN(NAME real128_intrinsic_real_01 LABELS gfortran llvm)
 RUN(NAME real128_literal_01 LABELS gfortran llvm)
 RUN(NAME equivalence_39 LABELS gfortran llvm)
 RUN(NAME get_environment_variable_01 LABELS gfortran llvm)
+RUN(NAME allocatable_scalar_assign_01 LABELS gfortran llvm)
