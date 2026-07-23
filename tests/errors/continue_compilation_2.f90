@@ -27,6 +27,16 @@ end subroutine myname
 block data myname
 end block data myname
 
+subroutine allocate_func8_test
+    character(0), allocatable :: ch
+    allocate(character(-1) :: FUNC8)
+end subroutine allocate_func8_test
+
+function func8() result(res) bind(c)
+    character(:), pointer :: res
+end function func8
+
+
 module continue_compilation_2_mod
     contains
 
