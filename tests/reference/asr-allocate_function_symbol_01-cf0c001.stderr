@@ -1,0 +1,5 @@
+semantic error: Allocate should only be called with Allocatable or Pointer type inputs, found `func8`
+ --> tests/errors/allocate_function_symbol_01.f90:2:29
+  |
+2 |   allocate(character(-1) :: FUNC8)
+  |                             ^^^^^ 'func8' is not allocatable or pointer

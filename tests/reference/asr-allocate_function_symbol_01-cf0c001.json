@@ -1,0 +1,13 @@
+{
+    "basename": "asr-allocate_function_symbol_01-cf0c001",
+    "cmd": "lfortran --show-asr --no-color {infile} -o {outfile}",
+    "infile": "tests/errors/allocate_function_symbol_01.f90",
+    "infile_hash": "4b3ec02190a9fedd59af04c4c516cb86ef0f8d8c2c7ed31965b95f35",
+    "outfile": null,
+    "outfile_hash": null,
+    "stdout": null,
+    "stdout_hash": null,
+    "stderr": "asr-allocate_function_symbol_01-cf0c001.stderr",
+    "stderr_hash": "1af5b58082f549b62236105b5ef9126e54e0f12a3497ba3260cea417",
+    "returncode": 2
+}
