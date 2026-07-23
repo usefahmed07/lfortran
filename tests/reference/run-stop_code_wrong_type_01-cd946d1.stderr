@@ -1,39 +1,5 @@
-Internal Compiler Error: Unhandled exception
-Traceback (most recent call last):
-[2m  Binary file "[0m[1m[35m$DIR/src/bin/lfortran[39m[0m[2m", in _start[0m
-[2m  File "[0m[1m[35m./csu/../csu/libc-start.c[39m[0m[2m", line 360, in __libc_start_main[0m
-[2m  File "[0m[1m[35m./csu/../sysdeps/nptl/libc_start_call_main.h[39m[0m[2m", line 58, in __libc_start_call_main[0m
-[2m  File "[0m[1m[35m$DIR/src/bin/lfortran.cpp[39m[0m[2m", line 3010, in main[0m
-    return main_app(argc, argv);
-[2m  File "[0m[1m[35m$DIR/src/bin/lfortran.cpp[39m[0m[2m", line 2923, in main_app(int, char**)[0m
-    err = compile_src_to_object_file(arg_file, tmp_o, compiler_options.time_report, false,
-[2m  File "[0m[1m[35m$DIR/src/bin/lfortran.cpp[39m[0m[2m", line 1303, in (anonymous namespace)::compile_src_to_object_file(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool, bool, LCompilers::CompilerOptions&, LCompilers::PassManager&, bool, bool*)[0m
-    res = fe.get_llvm3(*asr, lpm, diagnostics, lm, infile, &time_opt);
-[2m  File "[0m[1m[35m$DIR/src/lfortran/fortran_evaluator.cpp[39m[0m[2m", line 443, in LCompilers::FortranEvaluator::get_llvm3(LCompilers::ASR::TranslationUnit_t&, LCompilers::PassManager&, LCompilers::diag::Diagnostics&, LCompilers::LocationManager&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int*)[0m
-    compiler_options, run_fn, "", infile, lm);
-[2m  File "[0m[1m[35m$DIR/src/libasr/codegen/asr_to_llvm.cpp[39m[0m[2m", line 27501, in LCompilers::asr_to_llvm(LCompilers::ASR::TranslationUnit_t&, LCompilers::diag::Diagnostics&, llvm::LLVMContext&, Allocator&, LCompilers::PassManager&, LCompilers::CompilerOptions&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, LCompilers::LocationManager&)[0m
-    v.visit_asr((ASR::asr_t&)asr);
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 372, in LCompilers::ASR::BaseVisitor<LCompilers::ASRToLLVMVisitor>::visit_asr(LCompilers::ASR::asr_t const&)[0m
-    void visit_asr(const asr_t &b) { visit_asr_t(b, self()); }
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 346, in void LCompilers::ASR::visit_asr_t<LCompilers::ASRToLLVMVisitor>(LCompilers::ASR::asr_t const&, LCompilers::ASRToLLVMVisitor&)[0m
-    case asrType::unit: { v.visit_unit((const unit_t &)x); return; }
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 373, in LCompilers::ASR::BaseVisitor<LCompilers::ASRToLLVMVisitor>::visit_unit(LCompilers::ASR::unit_t const&)[0m
-    void visit_unit(const unit_t &b) { visit_unit_t(b, self()); }
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 22, in void LCompilers::ASR::visit_unit_t<LCompilers::ASRToLLVMVisitor>(LCompilers::ASR::unit_t const&, LCompilers::ASRToLLVMVisitor&)[0m
-    case unitType::TranslationUnit: { v.visit_TranslationUnit((const TranslationUnit_t &)x); return; }
-[2m  File "[0m[1m[35m$DIR/src/libasr/codegen/asr_to_llvm.cpp[39m[0m[2m", line 1926, in LCompilers::ASRToLLVMVisitor::visit_TranslationUnit(LCompilers::ASR::TranslationUnit_t const&)[0m
-    visit_symbol(*item.second);
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 375, in LCompilers::ASR::BaseVisitor<LCompilers::ASRToLLVMVisitor>::visit_symbol(LCompilers::ASR::symbol_t const&)[0m
-    void visit_symbol(const symbol_t &b) { visit_symbol_t(b, self()); }
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 30, in void LCompilers::ASR::visit_symbol_t<LCompilers::ASRToLLVMVisitor>(LCompilers::ASR::symbol_t const&, LCompilers::ASRToLLVMVisitor&)[0m
-    case symbolType::Program: { v.visit_Program((const Program_t &)x); return; }
-[2m  File "[0m[1m[35m$DIR/src/libasr/codegen/asr_to_llvm.cpp[39m[0m[2m", line 6445, in LCompilers::ASRToLLVMVisitor::visit_Program(LCompilers::ASR::Program_t const&)[0m
-    this->visit_stmt(*x.m_body[i]);
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 393, in LCompilers::ASR::BaseVisitor<LCompilers::ASRToLLVMVisitor>::visit_stmt(LCompilers::ASR::stmt_t const&)[0m
-    void visit_stmt(const stmt_t &b) { visit_stmt_t(b, self()); }
-[2m  File "[0m[1m[35m$DIR/src/libasr/../libasr/asr_base_visitor.h[39m[0m[2m", line 85, in void LCompilers::ASR::visit_stmt_t<LCompilers::ASRToLLVMVisitor>(LCompilers::ASR::stmt_t const&, LCompilers::ASRToLLVMVisitor&)[0m
-    case stmtType::Stop: { v.visit_Stop((const Stop_t &)x); return; }
-[2m  File "[0m[1m[35m$DIR/src/libasr/codegen/asr_to_llvm.cpp[39m[0m[2m", line 21507, in LCompilers::ASRToLLVMVisitor::visit_Stop(LCompilers::ASR::Stop_t const&)[0m
-    construct_stop(exit_code, "STOP", x.m_code, x.base.base.loc);
-LCompilersException: Stop Code should be of type [String, Integer].
-CurrentType : real
+semantic error: Stop code must be of type INTEGER or CHARACTER, found `f32`
+ --> tests/errors/stop_code_wrong_type_01.f90:4:1
+  |
+4 | stop x
+  | ^^^^^^ 
