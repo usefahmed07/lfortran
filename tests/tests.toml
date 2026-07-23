@@ -507,7 +507,7 @@ filename = "errors/real_unsupported_kind_01.f90"
 asr = true
 [[test]]
 filename = "errors/allocate_function_symbol_01.f90"
-asr = true
+continue_compilation = true
 
 
 [[test]]
