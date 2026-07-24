@@ -12543,6 +12543,15 @@ public:
                 llvm::Type* target_ptr_type = llvm_utils->get_type_from_ttype_t_util(x.m_target, ASRUtils::expr_type(x.m_target), module.get());
                 target = llvm_utils->CreateLoad2(target_ptr_type, target);
             } else if (!value->getType()->isPointerTy()) {
+                // When the value is also allocatable (is_llvm_pointer),
+                // the value has been fully loaded to its element type,
+                // but the target still needs allocation if it is null.
+                if (ASR::is_a<ASR::Integer_t>(*asr_type) ||
+                    ASR::is_a<ASR::Real_t>(*asr_type) ||
+                    ASR::is_a<ASR::Complex_t>(*asr_type) ||
+                    ASR::is_a<ASR::Logical_t>(*asr_type)) {
+                    check_and_allocate_scalar(x.m_target);
+                }
                 llvm::Type* target_ptr_type = llvm_utils->get_type_from_ttype_t_util(x.m_target, ASRUtils::expr_type(x.m_target), module.get());
                 target = llvm_utils->CreateLoad2(target_ptr_type, target);
             }
@@ -16913,6 +16922,17 @@ public:
                     nullptr, desc_type_asr, module.get());
                 data_ptr = llvm_utils->CreateLoad2(
                     desc_llvm_type->getPointerTo(), data_ptr);
+            } else if ((ASR::is_a<ASR::Allocatable_t>(*item_type_asr) ||
+                        ASR::is_a<ASR::Pointer_t>(*item_type_asr)) &&
+                       !ASRUtils::is_character(*item_type_asr)) {
+                // For scalar allocatables/pointers, the symtab value stores the
+                // address of the target. Load through it so the namelist item
+                // points at the target's data, not at the pointer variable.
+                ASR::ttype_t* tgt_type_asr = ASRUtils::type_get_past_allocatable_pointer(item_type_asr);
+                llvm::Type* tgt_llvm_type = llvm_utils->get_type_from_ttype_t_util(
+                    nullptr, tgt_type_asr, module.get());
+                data_ptr = llvm_utils->CreateLoad2(
+                    tgt_llvm_type->getPointerTo(), data_ptr);
             }
 
             // Determine type code

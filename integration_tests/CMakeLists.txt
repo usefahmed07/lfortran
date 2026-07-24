@@ -1139,6 +1139,7 @@ RUN(NAME namelist_34 LABELS gfortran llvm)
 
 
 RUN(NAME namelist_35 LABELS gfortran llvm)
+RUN(NAME namelist_36 LABELS gfortran llvm)
 
 RUN(NAME nested_namelist_01 LABELS gfortran llvm)
 
@@ -2337,6 +2338,7 @@ RUN(NAME logical3 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm)
 RUN(NAME logical4 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc wasm fortran)
 RUN(NAME logical_casting_01 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc fortran
     EXTRA_ARGS --logical-casting NO_STD_F23)
+RUN(NAME logical_array_cast_01 LABELS gfortran llvm)
 
 RUN(NAME logical_kind_01 LABELS gfortran llvm)
 RUN(NAME logical_kind_02 LABELS gfortran llvm)
@@ -3534,6 +3536,7 @@ RUN(NAME nested_vars_08 LABELS gfortran llvm)
 RUN(NAME nested_vars_09 LABELS gfortran llvm)
 RUN(NAME nested_vars_10 LABELS gfortran llvm)
 RUN(NAME nested_vars_11 LABELS gfortran llvm)
+RUN(NAME nested_vars_12 LABELS gfortran llvm EXTRAFILES nested_vars_12a.f90 nested_vars_12b.f90 EXTRA_ARGS --separate-compilation)
 
 RUN(NAME pass_array_by_data_01 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc llvmStackArray wasm)
 RUN(NAME pass_array_by_data_02 LABELS gfortran llvm llvm_wasm llvm_wasm_emcc llvmStackArray)
@@ -4086,6 +4089,10 @@ RUN(NAME cpp_pre_16 LABELS gfortran llvm
     GFORTRAN_ARGS -cpp)
 
 RUN(NAME cpp_pre_17 LABELS gfortran llvm
+    EXTRA_ARGS --cpp
+    GFORTRAN_ARGS -cpp)
+
+RUN(NAME cpp_pre_18 LABELS gfortran llvm
     EXTRA_ARGS --cpp
     GFORTRAN_ARGS -cpp)
 
@@ -4953,3 +4960,4 @@ RUN(NAME real128_intrinsic_real_01 LABELS gfortran llvm)
 RUN(NAME real128_literal_01 LABELS gfortran llvm)
 RUN(NAME equivalence_39 LABELS gfortran llvm)
 RUN(NAME get_environment_variable_01 LABELS gfortran llvm)
+RUN(NAME allocatable_scalar_assign_01 LABELS gfortran llvm)
